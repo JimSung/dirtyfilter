@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/wordfilter.iml" filepath="$PROJECT_DIR$/.idea/wordfilter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/dirtyfilter.iml" filepath="$PROJECT_DIR$/.idea/dirtyfilter.iml" />
     </modules>
   </component>
 </project>

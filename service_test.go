@@ -11,6 +11,7 @@ import (
 	"dirtyfilter/proto"
 	"strings"
 	"fmt"
+	"unicode/utf8"
 )
 
 var (
@@ -22,6 +23,9 @@ var (
 		"快来1100y.com",
 		"水乳交融",
 		"abc",
+		"毛泽东毛泽东",
+		"操你妈",
+		"admin",
 	}
 	conn *grpc.ClientConn
 )
@@ -86,4 +90,16 @@ func BenchmarkWordFilterb(b *testing.B) {
 func TestCheck(t *testing.T) {
 	i := strings.Index("1100y.com", "1100y.com")
 	fmt.Println(i)
+}
+
+func TestTrim(t *testing.T) {
+	s := "     shhh aaa    "
+	fmt.Println(strings.Trim(s, " "))
+}
+
+func TestLen(t *testing.T) {
+	a := "fuck"
+	aByte := []byte(a)
+	fmt.Println(string(aByte[0:4]))
+	fmt.Println(utf8.RuneCount(aByte[0:4]))
 }

@@ -2,9 +2,9 @@ package main
 
 import (
 	"bufio"
+	pb "dirtyfilter/proto"
 	"os"
 	"strings"
-	pb "dirtyfilter/proto"
 
 	"golang.org/x/net/context"
 
@@ -23,7 +23,7 @@ func (s *server) init() {
 	s.dirty_words = make(map[string]bool)
 
 	//dictionary := "./dictionary.txt"
-	dirty := "./dirty2017.txt"
+	dirty := "./dirty.txt"
 
 	//// 载入字典
 	//log.Info("Loading Dictionary...")
@@ -42,9 +42,9 @@ func (s *server) init() {
 	scanner := bufio.NewScanner(f)
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
-		words := strings.Split(strings.ToUpper(strings.TrimSpace(scanner.Text())), " %") // 均处理为大写
-		if words[0] != "" {
-			s.dirty_words[words[0]] = true
+		words := strings.ToUpper(strings.TrimSpace(scanner.Text())) // 均处理为大写
+		if words != "" {
+			s.dirty_words[words] = true
 		}
 	}
 	log.Info("Dirty Words Loaded")
@@ -74,25 +74,38 @@ func (s *server) Filter(ctx context.Context, in *pb.WordFilter_Text) (*pb.WordFi
 	//}
 	//return &pb.WordFilter_Text{string(clean_text)}, nil
 
-	word := in.Text
-	for key, _ := range s.dirty_words {
-		i := strings.Index(strings.ToUpper(word), key)
-		if i > -1 {
-			word = checkWord(word, key, i)
+	words := in.Text
+	indexMap := make(map[int]struct{})
+	for key := range s.dirty_words {
+		for _, index := range checkWord(strings.ToUpper(words), key) {
+			indexMap[index] = struct{}{}
 		}
 	}
-	return &pb.WordFilter_Text{word}, nil
+	wordsRune := []rune(words)
+	for i := range indexMap {
+		wordsRune[i] = '*'
+		//b = append(b, wordsBytes[i])
+		//if utf8.Valid(b) {
+		//	clear += string(wordsBytes[i:]) + "*"
+		//	b = []byte{}
+		//}
+	}
+	return &pb.WordFilter_Text{Text: string(wordsRune)}, nil
 }
 
-func checkWord(word, dirtyKey string, i int) (text string){
-	bc := []byte(word)
-	bd := []byte(dirtyKey)
-	n := utf8.RuneCount(bd)
-	rd := strings.Repeat("*",n)
-	if strings.ToUpper(word) == dirtyKey {
-		text = rd
-	} else {
-		text = string(bc[:i]) + rd + string(bc[i+len(dirtyKey):])
+func checkWord(words, dirtyKey string) (indexList []int) {
+	n := 0
+	for i := 0; i+len(dirtyKey) <= len(words); i++ {
+		if words[i] == dirtyKey[0] && (len(dirtyKey) == 1 || words[i:i+len(dirtyKey)] == dirtyKey) {
+			wordsByte := []byte(words)
+			if i > 0 {
+				n = utf8.RuneCount(wordsByte[0:i])
+			}
+			for j := 0; j < utf8.RuneCount(wordsByte[i:i+len(dirtyKey)]); j++ {
+				indexList = append(indexList, n+j)
+			}
+			i += len(dirtyKey) - 1
+		}
 	}
 	return
 }
