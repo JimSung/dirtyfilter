@@ -10,6 +10,3 @@
 参考测试用例以及wordfilter.proto文件
 `go build`
 `./dirtyfilter`
-
-## 安装
-参考Dockerfile

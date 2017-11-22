@@ -6,12 +6,13 @@ import (
 	"testing"
 	"time"
 
+	"dirtyfilter/proto"
+	"fmt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"dirtyfilter/proto"
 	"strings"
-	"fmt"
 	"unicode/utf8"
+	"sort"
 )
 
 var (
@@ -25,7 +26,7 @@ var (
 		"abc",
 		"毛泽东毛泽东",
 		"操你妈",
-		"admin",
+		"Ecru Game Eagle",
 	}
 	conn *grpc.ClientConn
 )
@@ -102,4 +103,18 @@ func TestLen(t *testing.T) {
 	aByte := []byte(a)
 	fmt.Println(string(aByte[0:4]))
 	fmt.Println(utf8.RuneCount(aByte[0:4]))
+}
+
+func TestType(t *testing.T) {
+	a := []int{1,4,2,3,5}
+	sort.Slice(a, func(i, j int) bool {
+		x, y := a[i], a[j]
+		if x > y {
+			return true
+		}
+		return false
+	})
+	for _, b := range a {
+		fmt.Println(b)
+	}
 }
