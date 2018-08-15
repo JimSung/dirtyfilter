@@ -8,11 +8,12 @@ import (
 
 	"dirtyfilter/proto"
 	"fmt"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
+	"sort"
 	"strings"
 	"unicode/utf8"
-	"sort"
+
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -31,6 +32,7 @@ var (
 	conn *grpc.ClientConn
 )
 
+// 模拟client测试
 func init() {
 	// Set up a connection to the server.
 	_conn, err := grpc.Dial(address, grpc.WithInsecure())
@@ -76,18 +78,6 @@ func Test_WorldFiter(t *testing.T) {
 	t.Logf("cost:%v", time.Now().Sub(last))
 }
 
-// ttl 未考虑
-func BenchmarkWordFilterb(b *testing.B) {
-	c := proto.NewWordFilterServiceClient(conn)
-	for i := 0; i < b.N; i++ {
-		r, err := c.Filter(context.Background(), &proto.WordFilter_Text{Text: testText[i%3]})
-		if err != nil {
-			b.Fatal(err)
-		}
-		_ = r
-	}
-}
-
 func TestCheck(t *testing.T) {
 	i := strings.Index("1100y.com", "1100y.com")
 	fmt.Println(i)
@@ -106,7 +96,7 @@ func TestLen(t *testing.T) {
 }
 
 func TestType(t *testing.T) {
-	a := []int{1,4,2,3,5}
+	a := []int{1, 4, 2, 3, 5}
 	sort.Slice(a, func(i, j int) bool {
 		x, y := a[i], a[j]
 		if x > y {
